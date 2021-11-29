@@ -1,0 +1,56 @@
+version: "3"
+services:
+  db:
+    image: postgres:latest
+    command: postgres -c shared_preload_libraries=pg_stat_statements -c pg_stat_statements.track=all -c pg_stat_statements.max=10000
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: monitor
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: default_database
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
+  splunk-otel-collector:
+    image: quay.io/signalfx/splunk-otel-collector:latest
+    environment:
+      - SPLUNK_ACCESS_TOKEN=${SPLUNK_ACCESS_TOKEN}
+      - SPLUNK_REALM=${SPLUNK_REALM}
+      - SPLUNK_CONFIG=/etc/collector.yaml
+      - SPLUNK_HEC_TOKEN=00000000-0000-0000-0000-0000000000000
+      - SPLUNK_HEC_URL=https://splunk:8088/services/collector
+    volumes:
+      - ./collector.yaml:/etc/collector.yaml
+    ports:
+      - "13133:13133"
+      - "14250:14250"
+      - "14268:14268"
+      - "4317:4317"
+      - "6060:6060"
+      - "8888:8888"
+      - "9080:9080"
+      - "9411:9411"
+      - "9943:9943"
+    depends_on:
+      - splunk
+      - db
+
+  splunk:
+    image: splunk/splunk:latest
+    container_name: splunk
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_HEC_TOKEN=00000000-0000-0000-0000-0000000000000
+      - SPLUNK_PASSWORD=opentelemetry
+    ports:
+      - 18000:8000
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - ./splunk.yml:/tmp/defaults/default.yml
+      - /opt/splunk/var
+      - /opt/splunk/etc
