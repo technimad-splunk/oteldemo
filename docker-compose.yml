@@ -36,6 +36,11 @@ services:
       - splunk
       - db
 
+  prometheus-generator:
+    image: esaka/prometheus-export-sample
+    ports:
+      - 2112:2112
+
   splunk:
     image: splunk/splunk:latest
     container_name: splunk
