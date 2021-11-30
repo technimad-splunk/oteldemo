@@ -89,9 +89,12 @@ exporters:
     timeout: 10s
     # Whether to skip checking the certificate of the HEC endpoint when sending data over HTTPS. Defaults to false.
     # For this demo, we use a self-signed certificate on the Splunk docker instance, so this flag is set to true.
-    insecure_skip_verify: true
-#    tls:
-#      insecure: true
+    tls:
+      insecure_skip_verify: true
+
+#  logging:
+#    loglevel: debug
+
 service:
   extensions:
   - memory_ballast
@@ -108,3 +111,12 @@ service:
       - metricstransform/host
       exporters:
       - splunk_hec
+#    metrics:
+#      receivers:
+#      - smartagent/custom
+#      - prometheus
+#      processors:
+#      - batch
+#      - metricstransform/host
+#      exporters:
+#      - logging
