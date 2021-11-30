@@ -26,6 +26,14 @@ receivers:
 #          - __name__
 #          regex: .*go.*
 #          action: drop
+  smartagent/custom:
+    type: collectd/custom
+    template: |
+      LoadPlugin network
+      <Plugin network>
+        Listen "0.0.0.0" "23456"
+      </Plugin>
+
 processors:
   batch:
   memory_limiter:
@@ -47,6 +55,15 @@ processors:
     - ecs
     - system
     override: true
+  metricstransform/host:
+    transforms:
+      - include: (.*)
+        match_type: regexp
+        action: update
+        operations:
+        - action: update_label
+          label: host
+          new_label: host.name
 exporters:
   sapm:
     access_token: ${SPLUNK_ACCESS_TOKEN}
@@ -83,9 +100,11 @@ service:
       receivers:
       - smartagent/postgresql
       - prometheus
+      - smartagent/custom
       processors:
       - memory_limiter
       - batch
       - resourcedetection
+      - metricstransform/host
       exporters:
       - splunk_hec

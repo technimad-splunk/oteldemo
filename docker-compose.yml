@@ -32,13 +32,21 @@ services:
       - "9080:9080"
       - "9411:9411"
       - "9943:9943"
+      - "23456"
     depends_on:
       - splunk
       - db
       - prometheus-generator
+      - collectd-generator
 
   prometheus-generator:
     image: esaka/prometheus-export-sample
+    scale: 4
+
+  collectd-generator:
+    build: ./collectd
+    volumes:
+      - ./collectd.d/generator.conf:/etc/collectd/collectd.conf
     scale: 4
 
   splunk:
