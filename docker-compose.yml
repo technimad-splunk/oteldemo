@@ -35,11 +35,11 @@ services:
     depends_on:
       - splunk
       - db
+      - prometheus-generator
 
   prometheus-generator:
     image: esaka/prometheus-export-sample
-    ports:
-      - 2112:2112
+    scale: 4
 
   splunk:
     image: splunk/splunk:latest
