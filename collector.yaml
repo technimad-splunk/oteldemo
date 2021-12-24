@@ -17,10 +17,10 @@ receivers:
         scrape_interval: 10s
         static_configs:
         - targets:
-          - postgresql-metrics_prometheus-generator_1:2112
-          - postgresql-metrics_prometheus-generator_2:2112
-          - postgresql-metrics_prometheus-generator_3:2112
-          - postgresql-metrics_prometheus-generator_4:2112
+          - oteldemo_prometheus-generator_1:2112
+          - oteldemo_prometheus-generator_2:2112
+          - oteldemo_prometheus-generator_3:2112
+          - oteldemo_prometheus-generator_4:2112
 #        metric_relabel_configs:
 #        - source_labels:
 #          - __name__

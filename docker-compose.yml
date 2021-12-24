@@ -51,7 +51,7 @@ services:
 
   splunk:
     image: splunk/splunk:latest
-    container_name: splunk
+    container_name: oteldemo-splunk
     environment:
       - SPLUNK_START_ARGS=--accept-license
       - SPLUNK_HEC_TOKEN=00000000-0000-0000-0000-0000000000000
