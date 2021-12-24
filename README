@@ -18,6 +18,9 @@ Use a container with a minimal go program which exports internal go metrics base
 
 ** External Documentation consulted:
 
+Otel config Configurator:
+https://bossofopsando11y.com/configurator/standalone
+
 Logging exporter:
 https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/loggingexporter
 
@@ -27,6 +30,9 @@ https://github.com/signalfx/splunk-otel-collector/blob/main/go.mod
 Splunk HEC exporter documentation
 https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/splunkhecexporter
 
+Postgres receiver
+https://docs.splunk.com/observability/gdi/postgresql/postgresql.html#postgresql
+
 Example configuration metrics transform processor:
 https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/testdata/config_full.yaml
 
@@ -35,3 +41,6 @@ https://collectd.org/wiki/index.php/Plugin:Network
 
 Collectd receiver configuration:
 https://docs.splunk.com/observability/gdi/collectd/collectd.html#nav-Collectd-plugin
+
+Prometheus receiver:
+https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/prometheusreceiver
