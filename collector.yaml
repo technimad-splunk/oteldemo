@@ -10,6 +10,7 @@ receivers:
     masterDBName: default_database
     extraMetrics:
       - postgres_conflicts
+      - postgres_pct_connections
   prometheus:
     config:
       scrape_configs:
@@ -17,15 +18,10 @@ receivers:
         scrape_interval: 10s
         static_configs:
         - targets:
-          - oteldemo_prometheus-generator_1:2112
-          - oteldemo_prometheus-generator_2:2112
-          - oteldemo_prometheus-generator_3:2112
-          - oteldemo_prometheus-generator_4:2112
-#        metric_relabel_configs:
-#        - source_labels:
-#          - __name__
-#          regex: .*go.*
-#          action: drop
+          - oteldemo-prometheus-generator-1:2112
+          - oteldemo-prometheus-generator-2:2112
+          - oteldemo-prometheus-generator-3:2112
+          - oteldemo-prometheus-generator-4:2112
   smartagent/custom:
     type: collectd/custom
     template: |
@@ -63,7 +59,7 @@ processors:
         operations:
         - action: update_label
           label: host
-          new_label: host.name
+          new_label: net.host.name
 exporters:
   sapm:
     access_token: ${SPLUNK_ACCESS_TOKEN}
@@ -87,13 +83,12 @@ exporters:
     disable_compression: false
     # HTTP timeout when sending data. Defaults to 10s.
     timeout: 10s
-    # Whether to skip checking the certificate of the HEC endpoint when sending data over HTTPS. Defaults to false.
-    # For this demo, we use a self-signed certificate on the Splunk docker instance, so this flag is set to true.
+    # Whether to skip checking the certificate of the HEC endpoint 
+    # when sending data over HTTPS. Defaults to false.
+    # For this demo, we use a self-signed certificate on the Splunk docker instance, 
+    # so this flag is set to true.
     tls:
       insecure_skip_verify: true
-
-#  logging:
-#    loglevel: debug
 
 service:
   extensions:
@@ -111,12 +106,3 @@ service:
       - metricstransform/host
       exporters:
       - splunk_hec
-#    metrics:
-#      receivers:
-#      - smartagent/custom
-#      - prometheus
-#      processors:
-#      - batch
-#      - metricstransform/host
-#      exporters:
-#      - logging
