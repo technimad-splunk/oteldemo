@@ -1,0 +1,405 @@
+<form version="1.1">
+  <label>otel metrics</label>
+  <description></description>
+  <fieldset submitButton="false">
+    <input type="time" searchWhenChanged="true" token="global_time_tok">
+      <label>Time Range</label>
+      <default>
+        <earliest>-12h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown">
+      <label>Time Span</label>
+      <choice value="auto">auto</choice>
+      <choice value="5s">5s</choice>
+      <choice value="10s">10s</choice>
+      <choice value="30s">30s</choice>
+      <choice value="1m">1m</choice>
+      <choice value="5m">5m</choice>
+      <choice value="10m">10m</choice>
+      <choice value="30m">30m</choice>
+      <choice value="1h">1h</choice>
+      <default>auto</default>
+      <change>
+        <eval token="timechart_span">if($value$ == "auto", "", "span=".$value$)</eval>
+        <eval token="mstats_span">"span=".$value$</eval>
+      </change>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <title>df used</title>
+        <search>
+          <query>| mstats avg("df_complex.used") prestats=true WHERE "index"="metrics" span=5s BY "net.host.name"
+| timechart avg("df_complex.used") span=5s useother=false BY "net.host.name" WHERE max in top5
+| fields - _span*</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.fieldColors">{"postgresql-metrics_prometheus-generator_1":"#1e93c6","postgresql-metrics_prometheus-generator_2":"#f2b827","postgresql-metrics_prometheus-generator_3":"#d6563c","postgresql-metrics_prometheus-generator_4":"#6a5c9e"}</option>
+        <option name="charting.fieldDashStyles">{"postgresql-metrics_prometheus-generator_1":"solid","postgresql-metrics_prometheus-generator_2":"solid","postgresql-metrics_prometheus-generator_3":"solid","postgresql-metrics_prometheus-generator_4":"solid"}</option>
+        <option name="charting.gridLinesX.showMajorLines">1</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="displayview">analytics_workspace</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>go_memstats_alloc_bytes</title>
+        <search>
+          <query>| mstats avg("go_memstats_alloc_bytes") prestats=true WHERE "index"="metrics" $mstats_span$ BY "net.host.name"
+| timechart avg("go_memstats_alloc_bytes") $timechart_span$ useother=false BY "net.host.name" WHERE max in top5
+| fields - _span*</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.fieldColors">{"postgresql-metrics_prometheus-generator_1":"#1e93c6","postgresql-metrics_prometheus-generator_2":"#f2b827","postgresql-metrics_prometheus-generator_3":"#d6563c","postgresql-metrics_prometheus-generator_4":"#6a5c9e"}</option>
+        <option name="charting.gridLinesX.showMajorLines">true</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="charting.fieldDashStyles">{"postgresql-metrics_prometheus-generator_1":"solid","postgresql-metrics_prometheus-generator_2":"solid","postgresql-metrics_prometheus-generator_3":"solid","postgresql-metrics_prometheus-generator_4":"solid"}</option>
+        <option name="displayview">analytics_workspace</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>go_threads</title>
+        <search>
+          <query>| mstats avg("go_threads") prestats=true WHERE "index"="metrics" $mstats_span$ BY "net.host.name"
+| timechart avg("go_threads") $timechart_span$ useother=false BY "net.host.name" WHERE max in top5
+| fields - _span*</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.fieldColors">{"Avg":"#1e93c6","postgresql-metrics_prometheus-generator_1":"#1e93c6","postgresql-metrics_prometheus-generator_2":"#f2b827","postgresql-metrics_prometheus-generator_3":"#d6563c","postgresql-metrics_prometheus-generator_4":"#6a5c9e"}</option>
+        <option name="charting.gridLinesX.showMajorLines">true</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="charting.fieldDashStyles">{"Avg":"solid","postgresql-metrics_prometheus-generator_1":"solid","postgresql-metrics_prometheus-generator_2":"solid","postgresql-metrics_prometheus-generator_3":"solid","postgresql-metrics_prometheus-generator_4":"solid"}</option>
+        <option name="displayview">analytics_workspace</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>postgres_query_time</title>
+        <search>
+          <query>| mstats avg("postgres_query_time") prestats=true WHERE "index"="metrics" $mstats_span$ BY "database"
+| timechart avg("postgres_query_time") $timechart_span$ useother=false BY "database" WHERE max in top5
+| fields - _span*</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.fieldColors">{"Avg":"#1e93c6","393095dcd689":"#1e93c6"}</option>
+        <option name="charting.fieldDashStyles">{"Avg":"solid","393095dcd689":"solid"}</option>
+        <option name="charting.gridLinesX.showMajorLines">1</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="displayview">analytics_workspace</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>postgres_query_count</title>
+        <search>
+          <query>| mstats rate_sum("postgres_query_count") chart=true WHERE "index"="metrics" $mstats_span$ chart.useother=false chart.agg=max chart.limit=top5 BY "database"
+| fields - _span*
+| rename * AS "* /s"
+| rename "_time /s" AS _time</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.fieldColors">{"Avg":"#1e93c6","393095dcd689":"#1e93c6","393095dcd689 /s":"#f2b827"}</option>
+        <option name="charting.fieldDashStyles">{"Avg":"solid","393095dcd689":"solid","393095dcd689 /s":"solid"}</option>
+        <option name="charting.gridLinesX.showMajorLines">1</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="displayview">analytics_workspace</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>postgres_block_hit_ratio</title>
+        <search>
+          <query>| mstats avg("postgres_block_hit_ratio") prestats=true WHERE "index"="metrics" $mstats_span$ BY "database"
+| timechart avg("postgres_block_hit_ratio") $timechart_span$ useother=false BY "database" WHERE max in top5
+| fields - _span*</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.fieldColors">{"Avg":"#1e93c6","393095dcd689":"#1e93c6"}</option>
+        <option name="charting.fieldDashStyles">{"Avg":"solid","393095dcd689":"solid"}</option>
+        <option name="charting.gridLinesX.showMajorLines">1</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="displayview">analytics_workspace</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>postgres_database_size</title>
+        <search>
+          <query>| mstats avg("postgres_database_size") prestats=true WHERE "index"="metrics" $mstats_span$ BY database
+| timechart avg("postgres_database_size") $timechart_span$ useother=false BY database WHERE max in top5
+| fields - _span*</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.fieldColors">{"Avg":"#1e93c6","default_database":"#1e93c6","postgres":"#f2b827"}</option>
+        <option name="charting.gridLinesX.showMajorLines">true</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="charting.fieldDashStyles">{"Avg":"solid","default_database":"solid","postgres":"solid"}</option>
+        <option name="displayview">analytics_workspace</option>
+      </chart>
+    </panel>
+  </row>
+</form><form version="1.1">
+  <label>otel metrics</label>
+  <description></description>
+  <fieldset submitButton="false">
+    <input type="time" searchWhenChanged="true" token="global_time_tok">
+      <label>Time Range</label>
+      <default>
+        <earliest>-12h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown">
+      <label>Time Span</label>
+      <choice value="auto">auto</choice>
+      <choice value="5s">5s</choice>
+      <choice value="10s">10s</choice>
+      <choice value="30s">30s</choice>
+      <choice value="1m">1m</choice>
+      <choice value="5m">5m</choice>
+      <choice value="10m">10m</choice>
+      <choice value="30m">30m</choice>
+      <choice value="1h">1h</choice>
+      <default>auto</default>
+      <change>
+        <eval token="timechart_span">if($value$ == "auto", "", "span=".$value$)</eval>
+        <eval token="mstats_span">"span=".$value$</eval>
+      </change>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <title>df used</title>
+        <search>
+          <query>| mstats avg("df_complex.used") prestats=true WHERE "index"="metrics" span=5s BY "net.host.name"
+| timechart avg("df_complex.used") span=5s useother=false BY "net.host.name" WHERE max in top5
+| fields - _span*</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.fieldColors">{"postgresql-metrics_prometheus-generator_1":"#1e93c6","postgresql-metrics_prometheus-generator_2":"#f2b827","postgresql-metrics_prometheus-generator_3":"#d6563c","postgresql-metrics_prometheus-generator_4":"#6a5c9e"}</option>
+        <option name="charting.fieldDashStyles">{"postgresql-metrics_prometheus-generator_1":"solid","postgresql-metrics_prometheus-generator_2":"solid","postgresql-metrics_prometheus-generator_3":"solid","postgresql-metrics_prometheus-generator_4":"solid"}</option>
+        <option name="charting.gridLinesX.showMajorLines">1</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="displayview">analytics_workspace</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>go_memstats_alloc_bytes</title>
+        <search>
+          <query>| mstats avg("go_memstats_alloc_bytes") prestats=true WHERE "index"="metrics" $mstats_span$ BY "net.host.name"
+| timechart avg("go_memstats_alloc_bytes") $timechart_span$ useother=false BY "net.host.name" WHERE max in top5
+| fields - _span*</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.fieldColors">{"postgresql-metrics_prometheus-generator_1":"#1e93c6","postgresql-metrics_prometheus-generator_2":"#f2b827","postgresql-metrics_prometheus-generator_3":"#d6563c","postgresql-metrics_prometheus-generator_4":"#6a5c9e"}</option>
+        <option name="charting.gridLinesX.showMajorLines">true</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="charting.fieldDashStyles">{"postgresql-metrics_prometheus-generator_1":"solid","postgresql-metrics_prometheus-generator_2":"solid","postgresql-metrics_prometheus-generator_3":"solid","postgresql-metrics_prometheus-generator_4":"solid"}</option>
+        <option name="displayview">analytics_workspace</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>go_threads</title>
+        <search>
+          <query>| mstats avg("go_threads") prestats=true WHERE "index"="metrics" $mstats_span$ BY "net.host.name"
+| timechart avg("go_threads") $timechart_span$ useother=false BY "net.host.name" WHERE max in top5
+| fields - _span*</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.fieldColors">{"Avg":"#1e93c6","postgresql-metrics_prometheus-generator_1":"#1e93c6","postgresql-metrics_prometheus-generator_2":"#f2b827","postgresql-metrics_prometheus-generator_3":"#d6563c","postgresql-metrics_prometheus-generator_4":"#6a5c9e"}</option>
+        <option name="charting.gridLinesX.showMajorLines">true</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="charting.fieldDashStyles">{"Avg":"solid","postgresql-metrics_prometheus-generator_1":"solid","postgresql-metrics_prometheus-generator_2":"solid","postgresql-metrics_prometheus-generator_3":"solid","postgresql-metrics_prometheus-generator_4":"solid"}</option>
+        <option name="displayview">analytics_workspace</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>postgres_query_time</title>
+        <search>
+          <query>| mstats avg("postgres_query_time") prestats=true WHERE "index"="metrics" $mstats_span$ BY "database"
+| timechart avg("postgres_query_time") $timechart_span$ useother=false BY "database" WHERE max in top5
+| fields - _span*</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.fieldColors">{"Avg":"#1e93c6","393095dcd689":"#1e93c6"}</option>
+        <option name="charting.fieldDashStyles">{"Avg":"solid","393095dcd689":"solid"}</option>
+        <option name="charting.gridLinesX.showMajorLines">1</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="displayview">analytics_workspace</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>postgres_query_count</title>
+        <search>
+          <query>| mstats rate_sum("postgres_query_count") chart=true WHERE "index"="metrics" $mstats_span$ chart.useother=false chart.agg=max chart.limit=top5 BY "database"
+| fields - _span*
+| rename * AS "* /s"
+| rename "_time /s" AS _time</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.fieldColors">{"Avg":"#1e93c6","393095dcd689":"#1e93c6","393095dcd689 /s":"#f2b827"}</option>
+        <option name="charting.fieldDashStyles">{"Avg":"solid","393095dcd689":"solid","393095dcd689 /s":"solid"}</option>
+        <option name="charting.gridLinesX.showMajorLines">1</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="displayview">analytics_workspace</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>postgres_block_hit_ratio</title>
+        <search>
+          <query>| mstats avg("postgres_block_hit_ratio") prestats=true WHERE "index"="metrics" $mstats_span$ BY "database"
+| timechart avg("postgres_block_hit_ratio") $timechart_span$ useother=false BY "database" WHERE max in top5
+| fields - _span*</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.fieldColors">{"Avg":"#1e93c6","393095dcd689":"#1e93c6"}</option>
+        <option name="charting.fieldDashStyles">{"Avg":"solid","393095dcd689":"solid"}</option>
+        <option name="charting.gridLinesX.showMajorLines">1</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="displayview">analytics_workspace</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>postgres_database_size</title>
+        <search>
+          <query>| mstats avg("postgres_database_size") prestats=true WHERE "index"="metrics" $mstats_span$ BY database
+| timechart avg("postgres_database_size") $timechart_span$ useother=false BY database WHERE max in top5
+| fields - _span*</query>
+          <earliest>$global_time_tok.earliest$</earliest>
+          <latest>$global_time_tok.latest$</latest>
+        </search>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.fieldColors">{"Avg":"#1e93c6","default_database":"#1e93c6","postgres":"#f2b827"}</option>
+        <option name="charting.gridLinesX.showMajorLines">true</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.legend.mode">seriesCompare</option>
+        <option name="charting.fieldDashStyles">{"Avg":"solid","default_database":"solid","postgres":"solid"}</option>
+        <option name="displayview">analytics_workspace</option>
+      </chart>
+    </panel>
+  </row>
+</form>
