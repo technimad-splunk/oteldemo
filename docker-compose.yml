@@ -14,14 +14,17 @@ services:
       - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
   splunk-otel-collector:
     image: quay.io/signalfx/splunk-otel-collector:latest
+#    image: otel/opentelemetry-collector-contrib:latest
     environment:
       - SPLUNK_ACCESS_TOKEN=${SPLUNK_ACCESS_TOKEN}
       - SPLUNK_REALM=${SPLUNK_REALM}
       - SPLUNK_CONFIG=/etc/collector.yaml
-      - SPLUNK_HEC_TOKEN=00000000-0000-0000-0000-0000000000000
+      - SPLUNK_HEC_TOKEN_METRICS=00000000-0000-0000-0000-0000000000000
+      - SPLUNK_HEC_TOKEN_OTELCOL=00000000-0000-0000-0000-0000000000001
       - SPLUNK_HEC_URL=https://splunk:8088/services/collector
     volumes:
       - ./collector.yaml:/etc/collector.yaml
+      - ./sending_queue:/persistant_sending_queue
     ports:
       - "13133:13133"
       - "14250:14250"
@@ -41,20 +44,22 @@ services:
 
   prometheus-generator:
     image: esaka/prometheus-export-sample
-    scale: 4
+    deploy:
+      replicas: 8
 
   collectd-generator:
     build: ./collectd
     volumes:
       - ./collectd.d/generator.conf:/etc/collectd/collectd.conf
-    scale: 4
+    deploy:
+      replicas: 8
 
   splunk:
     image: splunk/splunk:latest
     container_name: oteldemo-splunk
     environment:
       - SPLUNK_START_ARGS=--accept-license
-      - SPLUNK_HEC_TOKEN=00000000-0000-0000-0000-0000000000000
+      - SPLUNK_APPS_URL=/tmp/filedirectory-information-input_146.tgz
       - SPLUNK_PASSWORD=opentelemetry
     ports:
       - 18000:8000
@@ -67,3 +72,5 @@ services:
       - ./splunk.yml:/tmp/defaults/default.yml
       - /opt/splunk/var
       - /opt/splunk/etc
+      - ./filedirectory-information-input_146.tgz:/tmp/filedirectory-information-input_146.tgz
+      - ./sending_queue:/persistant_sending_queue

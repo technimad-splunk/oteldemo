@@ -1,6 +1,17 @@
 extensions:
   memory_ballast:
     size_in_percentage: 33
+
+  file_storage/psq:
+     directory: /persistant_sending_queue
+     timeout: 10s # in what time a file lock should be obtained
+     compaction:
+       directory: /persistant_sending_queue
+       on_start: true
+       on_rebound: true
+       rebound_needed_threshold_mib: 5
+       rebound_trigger_threshold_mib: 3
+
 receivers:
   smartagent/postgresql:
     type: postgresql
@@ -22,6 +33,23 @@ receivers:
           - oteldemo-prometheus-generator-2:2112
           - oteldemo-prometheus-generator-3:2112
           - oteldemo-prometheus-generator-4:2112
+          - oteldemo-prometheus-generator-5:2112
+          - oteldemo-prometheus-generator-6:2112
+          - oteldemo-prometheus-generator-7:2112
+          - oteldemo-prometheus-generator-8:2112
+  prometheus/internal:
+    config:
+      scrape_configs:
+        - job_name: otel-collector
+          scrape_interval: 2s
+          static_configs:
+            - targets:
+                - 0.0.0.0:8888
+          metric_relabel_configs:
+            - source_labels:
+                - __name__
+              regex: .*grpc_io.*
+              action: drop
   smartagent/custom:
     type: collectd/custom
     template: |
@@ -34,7 +62,7 @@ processors:
   batch:
   memory_limiter:
     check_interval: 2s
-    limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
+    limit_mib: 1024
   resourcedetection:
     detectors:
     - ec2
@@ -70,8 +98,8 @@ exporters:
     ingest_url: ${SPLUNK_INGEST_URL}
     sync_host_metadata: true
     correlation:
-  splunk_hec:
-    token: ${SPLUNK_HEC_TOKEN}
+  splunk_hec/metrics:
+    token: ${SPLUNK_HEC_TOKEN_METRICS}
     endpoint: ${SPLUNK_HEC_URL}
     source: otel
     sourcetype: otel
@@ -89,12 +117,47 @@ exporters:
     # so this flag is set to true.
     tls:
       insecure_skip_verify: true
+    retry_on_failure:
+      enabled: true
+      initial_interval: 1s
+      max_interval: 300s
+      max_elapsed_time: 120s
+    sending_queue:
+      storage: file_storage/psq
+  splunk_hec/otelcol:
+    token: ${SPLUNK_HEC_TOKEN_OTELCOL}
+    endpoint: ${SPLUNK_HEC_URL}
+    source: otel
+    sourcetype: otel
+    # Splunk index, optional name of the Splunk index targeted.
+    index: "metrics"
+    # Maximum HTTP connections to use simultaneously when sending data. Defaults to 100.
+    max_connections: 20
+    # Whether to disable gzip compression over HTTP. Defaults to false.
+    disable_compression: false
+    # HTTP timeout when sending data. Defaults to 10s.
+    timeout: 1s
+    # Whether to skip checking the certificate of the HEC endpoint
+    # when sending data over HTTPS. Defaults to false.
+    # For this demo, we use a self-signed certificate on the Splunk docker instance,
+    # so this flag is set to true.
+    tls:
+      insecure_skip_verify: true
+    retry_on_failure:
+      enabled: true
+      initial_interval: 1s
+      max_interval: 300s
+      max_elapsed_time: 120s
+  logging:
+    loglevel: debug
+
 
 service:
   extensions:
   - memory_ballast
+  - file_storage/psq
   pipelines:
-    metrics:
+    metrics/metrics:
       receivers:
       - smartagent/postgresql
       - prometheus
@@ -105,4 +168,15 @@ service:
       - resourcedetection
       - metricstransform/host
       exporters:
-      - splunk_hec
+      - splunk_hec/metrics
+    metrics/otelcol:
+      receivers:
+        - prometheus/internal
+      processors:
+        - memory_limiter
+        - batch
+        - resourcedetection
+        - metricstransform/host
+      exporters:
+        - splunk_hec/otelcol
+      #- logging

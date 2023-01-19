@@ -3,12 +3,19 @@ Demonstrate how to use the splunk otel collector to collect metrics data using v
 
 ## Summary / how to use
 This demo runs a postgres database, prometheus sources, collectd senders, a splunk otel collector and splunk.
-Splunk can be reached via http://localhost:18000 user: admin pass: opentelemetry
 
-Default postgres metrics are sent to splunk enterprise, via HEC.
-One extra metric (postgres_conflicts) is configured, to show how to add more, specific metrics.
-List of supported metrics is available at: https://docs.splunk.com/Observability/gdi/postgresql/postgresql.html#postgresql
-masterDBName in postgresconfig is needed to get the data cllector to function correctly.
+You can start this demo with ```docker-compose up```.
+
+Splunk can be reached via 
+```
+url: http://localhost:18000  
+user: admin 
+pass: opentelemetry
+```
+
+Metrics are sent to splunk enterprise, via HEC.
+
+Exmaple dashboards for splunk can be found in the directory ```dashboards```.
 
 ## Data collection
 Data is collected in various ways:
@@ -26,8 +33,14 @@ masterDBName in postgresconfig is needed to get the data collector to function c
 
 ### Collectd
 Container with just collectd installed, and the config file collectd.d/generator.conf
-*** Prometheus
+### Prometheus
 Use a container with a minimal go program which exports internal go metrics based on https://github.com/esakat/prometheus-exporter-sample
+
+## Data export
+All collected metrics are sent to Splunk via HEC.
+We use two HEC endpoints:
+- all metrics collected via the opentelemetry collector
+- all internal metrics from the opentelemetry collector
 
 ## External Documentation consulted:
 

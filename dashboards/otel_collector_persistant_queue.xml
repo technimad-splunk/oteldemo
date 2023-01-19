@@ -1,0 +1,226 @@
+<form version="1.1" theme="dark">
+    <search id="annotation_base_search">
+        <query>index=_* http://* sourcetype=splunk_configuration_change "data.changes{}.stanza"="http://metrics"
+            | eval status=if('data.changes{}.properties{}.new_value'=1,"disabled", "enabled")
+            | eval annotation_color=if('data.changes{}.properties{}.new_value'=1,"#ff3300","#5CC05C")
+            | eval annotation_label="HEC input ".'data.changes{}.stanza'." ".status
+            | table _time annotation_label annotation_color</query>
+        <earliest>$field1.earliest$</earliest>
+        <latest>$field1.latest$</latest>
+        <sampleRatio>1</sampleRatio>
+        <refresh>30s</refresh>
+    </search>
+    <label>otel collector persistant queue</label>
+    <fieldset submitButton="false">
+        <input type="time" token="field1">
+            <label></label>
+            <default>
+                <earliest>-15m</earliest>
+                <latest>now</latest>
+            </default>
+        </input>
+    </fieldset>
+    <row>
+        <panel>
+            <title>Otel metrics sent and queue size</title>
+            <chart>
+                <search>
+                    <query>| mstats rate_avg("otelcol_exporter_sent_metric_points") as ms, max("otelcol_exporter_queue_size") as qs WHERE "index"="metrics" span=10s BY exporter | timechart span=10s max(ms) as "metrics sent/s" max(qs) as "queue size" by exporter</query>
+                    <earliest>$field1.earliest$</earliest>
+                    <latest>$field1.latest$</latest>
+                    <sampleRatio>1</sampleRatio>
+                    <refresh>30s</refresh>
+                    <refreshType>delay</refreshType>
+                </search>
+                <search type="annotation" base="annotation_base_search"></search>
+                <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+                <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+                <option name="charting.axisTitleX.visibility">collapsed</option>
+                <option name="charting.axisTitleY.visibility">collapsed</option>
+                <option name="charting.axisTitleY2.visibility">visible</option>
+                <option name="charting.axisX.abbreviation">none</option>
+                <option name="charting.axisX.scale">linear</option>
+                <option name="charting.axisY.abbreviation">none</option>
+                <option name="charting.axisY.scale">linear</option>
+                <option name="charting.axisY2.abbreviation">none</option>
+                <option name="charting.axisY2.enabled">0</option>
+                <option name="charting.axisY2.scale">inherit</option>
+                <option name="charting.chart">area</option>
+                <option name="charting.chart.bubbleMaximumSize">50</option>
+                <option name="charting.chart.bubbleMinimumSize">10</option>
+                <option name="charting.chart.bubbleSizeBy">area</option>
+                <option name="charting.chart.nullValueMode">gaps</option>
+                <option name="charting.chart.overlayFields">"metrics sent/s: splunk_hec","metrics sent/s: splunk_hec/metrics","metrics sent/s: splunk_hec/otelcol"</option>
+                <option name="charting.chart.showDataLabels">none</option>
+                <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+                <option name="charting.chart.stackMode">default</option>
+                <option name="charting.chart.style">shiny</option>
+                <option name="charting.drilldown">none</option>
+                <option name="charting.layout.splitSeries">0</option>
+                <option name="charting.layout.splitSeries.allowIndependentYRanges">1</option>
+                <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+                <option name="charting.legend.mode">standard</option>
+                <option name="charting.legend.placement">bottom</option>
+                <option name="charting.lineWidth">2</option>
+                <option name="height">278</option>
+                <option name="refresh.display">progressbar</option>
+                <option name="trellis.enabled">0</option>
+                <option name="trellis.scales.shared">1</option>
+                <option name="trellis.size">medium</option>
+            </chart>
+        </panel>
+        <panel>
+            <title>Size of persistant queue files on disk</title>
+            <chart>
+                <search>
+                    <query>index=* source="file_meta_data://psq" "is_directory=0" | timechart span=30s max(eval(round((size/1024/1024),2))) as MB by path</query>
+                    <earliest>$field1.earliest$</earliest>
+                    <latest>$field1.latest$</latest>
+                    <sampleRatio>1</sampleRatio>
+                    <refresh>30s</refresh>
+                    <refreshType>delay</refreshType>
+                </search>
+                <search type="annotation" base="annotation_base_search"></search>
+                <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+                <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+                <option name="charting.axisTitleX.visibility">collapsed</option>
+                <option name="charting.axisTitleY.text">MB</option>
+                <option name="charting.axisTitleY.visibility">visible</option>
+                <option name="charting.axisTitleY2.visibility">visible</option>
+                <option name="charting.axisX.abbreviation">none</option>
+                <option name="charting.axisX.scale">linear</option>
+                <option name="charting.axisY.abbreviation">auto</option>
+                <option name="charting.axisY.scale">linear</option>
+                <option name="charting.axisY2.abbreviation">none</option>
+                <option name="charting.axisY2.enabled">0</option>
+                <option name="charting.axisY2.scale">inherit</option>
+                <option name="charting.chart">line</option>
+                <option name="charting.chart.bubbleMaximumSize">50</option>
+                <option name="charting.chart.bubbleMinimumSize">10</option>
+                <option name="charting.chart.bubbleSizeBy">area</option>
+                <option name="charting.chart.nullValueMode">connect</option>
+                <option name="charting.chart.showDataLabels">none</option>
+                <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+                <option name="charting.chart.stackMode">default</option>
+                <option name="charting.chart.style">shiny</option>
+                <option name="charting.drilldown">none</option>
+                <option name="charting.layout.splitSeries">0</option>
+                <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+                <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+                <option name="charting.legend.mode">standard</option>
+                <option name="charting.legend.placement">bottom</option>
+                <option name="charting.lineWidth">2</option>
+                <option name="refresh.display">progressbar</option>
+                <option name="trellis.enabled">0</option>
+                <option name="trellis.scales.shared">1</option>
+                <option name="trellis.size">medium</option>
+            </chart>
+        </panel>
+    </row>
+    <row>
+        <panel>
+            <title>Measured memory size</title>
+            <chart>
+                <search>
+                    <query>| mstats avg("process_resident_memory_bytes") prestats=true WHERE "index"="metrics" span=10s BY "net.host.name"
+                        | timechart avg("process_resident_memory_bytes") span=10s useother=false BY "net.host.name" WHERE max in top10
+                        | fields - _span*</query>
+                    <earliest>$field1.earliest$</earliest>
+                    <latest>$field1.latest$</latest>
+                    <sampleRatio>1</sampleRatio>
+                    <refresh>30s</refresh>
+                    <refreshType>delay</refreshType>
+                </search>
+                <search type="annotation" base="annotation_base_search"></search>
+                <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+                <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+                <option name="charting.axisTitleX.visibility">collapsed</option>
+                <option name="charting.axisTitleY.visibility">visible</option>
+                <option name="charting.axisTitleY2.visibility">visible</option>
+                <option name="charting.axisX.abbreviation">none</option>
+                <option name="charting.axisX.scale">linear</option>
+                <option name="charting.axisY.abbreviation">auto</option>
+                <option name="charting.axisY.includeZero">1</option>
+                <option name="charting.axisY.scale">linear</option>
+                <option name="charting.axisY2.abbreviation">none</option>
+                <option name="charting.axisY2.enabled">0</option>
+                <option name="charting.axisY2.scale">inherit</option>
+                <option name="charting.chart">line</option>
+                <option name="charting.chart.bubbleMaximumSize">50</option>
+                <option name="charting.chart.bubbleMinimumSize">10</option>
+                <option name="charting.chart.bubbleSizeBy">area</option>
+                <option name="charting.chart.nullValueMode">gaps</option>
+                <option name="charting.chart.showDataLabels">none</option>
+                <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+                <option name="charting.chart.stackMode">default</option>
+                <option name="charting.chart.style">shiny</option>
+                <option name="charting.drilldown">none</option>
+                <option name="charting.fieldColors">{"Avg":"#1e93c6","oteldemo-prometheus-generator-1":"#1e93c6","oteldemo-prometheus-generator-2":"#f2b827","oteldemo-prometheus-generator-3":"#d6563c","oteldemo-prometheus-generator-4":"#6a5c9e"}</option>
+                <option name="charting.fieldDashStyles">{"Avg":"Solid","oteldemo-prometheus-generator-1":"Solid","oteldemo-prometheus-generator-2":"Solid","oteldemo-prometheus-generator-3":"Solid","oteldemo-prometheus-generator-4":"Solid"}</option>
+                <option name="charting.gridLinesX.showMajorLines">1</option>
+                <option name="charting.layout.splitSeries">0</option>
+                <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+                <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+                <option name="charting.legend.mode">seriesCompare</option>
+                <option name="charting.legend.placement">right</option>
+                <option name="charting.lineWidth">2</option>
+                <option name="refresh.display">progressbar</option>
+                <option name="trellis.enabled">0</option>
+                <option name="trellis.scales.shared">1</option>
+                <option name="trellis.size">medium</option>
+            </chart>
+        </panel>
+        <panel>
+            <title>Measured postgresql connection utilization</title>
+            <chart>
+                <search>
+                    <query>| mstats avg("postgres_pct_connections") prestats=true WHERE "index"="metrics" span=10s BY index
+                        | timechart avg("postgres_pct_connections") span=10s useother=false BY index WHERE max in top5
+                        | fields - _span*</query>
+                    <earliest>$field1.earliest$</earliest>
+                    <latest>$field1.latest$</latest>
+                    <sampleRatio>1</sampleRatio>
+                    <refresh>30s</refresh>
+                    <refreshType>delay</refreshType>
+                </search>
+                <search type="annotation" base="annotation_base_search"></search>
+                <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+                <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+                <option name="charting.axisTitleX.visibility">collapsed</option>
+                <option name="charting.axisTitleY.visibility">visible</option>
+                <option name="charting.axisTitleY2.visibility">visible</option>
+                <option name="charting.axisX.abbreviation">none</option>
+                <option name="charting.axisX.scale">linear</option>
+                <option name="charting.axisY.abbreviation">auto</option>
+                <option name="charting.axisY.includeZero">1</option>
+                <option name="charting.axisY.scale">linear</option>
+                <option name="charting.axisY2.abbreviation">none</option>
+                <option name="charting.axisY2.enabled">0</option>
+                <option name="charting.axisY2.scale">inherit</option>
+                <option name="charting.chart">line</option>
+                <option name="charting.chart.bubbleMaximumSize">50</option>
+                <option name="charting.chart.bubbleMinimumSize">10</option>
+                <option name="charting.chart.bubbleSizeBy">area</option>
+                <option name="charting.chart.nullValueMode">gaps</option>
+                <option name="charting.chart.showDataLabels">none</option>
+                <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+                <option name="charting.chart.stackMode">default</option>
+                <option name="charting.chart.style">shiny</option>
+                <option name="charting.drilldown">none</option>
+                <option name="charting.fieldColors">{"Avg":"#1e93c6","metrics":"#1e93c6"}</option>
+                <option name="charting.fieldDashStyles">{"Avg":"Solid","metrics":"Solid"}</option>
+                <option name="charting.gridLinesX.showMajorLines">1</option>
+                <option name="charting.layout.splitSeries">0</option>
+                <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+                <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+                <option name="charting.legend.mode">seriesCompare</option>
+                <option name="charting.legend.placement">bottom</option>
+                <option name="charting.lineWidth">2</option>
+                <option name="refresh.display">progressbar</option>
+                <option name="trellis.enabled">0</option>
+                <option name="trellis.scales.shared">1</option>
+                <option name="trellis.size">medium</option>
+            </chart>
+        </panel>
+    </row>
+</form>

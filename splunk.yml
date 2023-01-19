@@ -1,11 +1,37 @@
 splunk:
   conf:
-    indexes:
-      directory: /opt/splunk/etc/apps/search/local
-      content:
-        metrics:
-          coldPath: $SPLUNK_DB/metrics/colddb
-          datatype: metric
-          homePath: $SPLUNK_DB/metrics/db
-          maxTotalDataSizeMB: 512000
-          thawedPath: $SPLUNK_DB/metrics/thaweddb
+    - key: indexes
+      value:
+        directory: /opt/splunk/etc/apps/search/local
+        content:
+          metrics:
+            coldPath: $SPLUNK_DB/metrics/colddb
+            datatype: metric
+            homePath: $SPLUNK_DB/metrics/db
+            maxTotalDataSizeMB: 512000
+            thawedPath: $SPLUNK_DB/metrics/thaweddb
+    - key: inputs
+      value:
+        directory: /opt/splunk/etc/apps/search/local
+        content:
+          http:
+            disabled: 0
+          http://otelcollector:
+            disabled: 0
+            index: metrics
+            token: 00000000-0000-0000-0000-0000000000001
+          http://metrics:
+            disabled: 0
+            index: metrics
+            token: 00000000-0000-0000-0000-0000000000000
+    - key: inputs
+      value:
+        directory: /opt/splunk/etc/apps/file_meta_data/local
+        content:
+          "file_meta_data://psq" :
+            file_hash_limit: 500MB
+            file_path: "/persistant_sending_queue"
+            include_file_hash:  0
+            interval: 30s
+            only_if_changed: 0
+            recurse: 1
