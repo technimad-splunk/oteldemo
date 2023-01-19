@@ -64,3 +64,8 @@ Collectd receiver configuration:
 https://docs.splunk.com/observability/gdi/collectd/collectd.html#nav-Collectd-plugin  
 Prometheus receiver:
 https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/prometheusreceiver  
+OpenTelemetry Collector filestorage extension:
+https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/storage/filestorage  
+OpenTelemetry Collector exporterhelper: 
+https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/exporterhelper  
+
